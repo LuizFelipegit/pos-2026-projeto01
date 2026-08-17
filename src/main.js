@@ -1,178 +1,512 @@
 import "./style.css";
-import { getUsers, getPostsByUser } from "./api.js";
 
-const usersContainer = document.querySelector("#users");
-const statusElement = document.querySelector("#status");
-const searchInput = document.querySelector("#searchInput");
+import {
+  buscarFilmes,
+  buscarDetalhesFilme
+} from "./api.js";
 
-let users = [];
 
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+const moviesContainer =
+  document.querySelector("#moviesContainer");
+
+const loading =
+  document.querySelector("#loading");
+
+const error =
+  document.querySelector("#error");
+
+const empty =
+  document.querySelector("#empty");
+
+const searchInput =
+  document.querySelector("#searchInput");
+
+const searchButton =
+  document.querySelector("#searchButton");
+
+const movieModal =
+  document.querySelector("#movieModal");
+
+const movieDetails =
+  document.querySelector("#movieDetails");
+
+const closeModal =
+  document.querySelector("#closeModal");
+
+const modalOverlay =
+  document.querySelector("#modalOverlay");
+
+const tryAgain =
+  document.querySelector("#tryAgain");
+
+
+/**
+ * Mostra o carregamento
+ */
+function mostrarLoading() {
+
+  loading.classList.remove("hidden");
+
+  error.classList.add("hidden");
+
+  empty.classList.add("hidden");
+
+  moviesContainer.innerHTML = "";
 }
 
-function createUserCard(user) {
-  const card = document.createElement("article");
-  card.className = "user-card";
 
-  card.innerHTML = `
-    <div class="user-card__top">
-      <div class="avatar">${escapeHtml(user.name.charAt(0))}</div>
+/**
+ * Esconde o carregamento
+ */
+function esconderLoading() {
 
-      <div>
-        <h3>${escapeHtml(user.name)}</h3>
-        <p class="username">@${escapeHtml(user.username)}</p>
+  loading.classList.add("hidden");
+}
+
+
+/**
+ * Mostra erro
+ */
+function mostrarErro() {
+
+  loading.classList.add("hidden");
+
+  error.classList.remove("hidden");
+
+  moviesContainer.innerHTML = "";
+}
+
+
+/**
+ * Formata a data
+ */
+function formatarAno(data) {
+
+  if (!data) {
+    return "Ano desconhecido";
+  }
+
+  return data.substring(0, 4);
+}
+
+
+/**
+ * Cria um card de filme
+ */
+function criarCard(filme) {
+
+  const article =
+    document.createElement("article");
+
+  article.className = "movie-card";
+
+
+  const imagem =
+    filme.images?.jpg?.large_image_url ||
+    filme.images?.jpg?.image_url ||
+    "https://via.placeholder.com/300x450?text=Sem+Poster";
+
+
+  const titulo =
+    filme.title || "Título desconhecido";
+
+
+  const nota =
+    filme.score
+      ? filme.score.toFixed(1)
+      : "N/A";
+
+
+  const ano =
+    formatarAno(filme.aired?.from);
+
+
+  const generos =
+    filme.genres
+      ?.slice(0, 2)
+      .map(genero => genero.name)
+      .join(" • ") ||
+    "Filme";
+
+
+  article.innerHTML = `
+
+    <div class="poster-container">
+
+      <img
+        src="${imagem}"
+        alt="Poster de ${titulo}"
+        loading="lazy"
+      >
+
+      <div class="movie-score">
+        ⭐ ${nota}
       </div>
+
     </div>
 
-    <div class="user-info">
-      <p><strong>E-mail:</strong> ${escapeHtml(user.email)}</p>
-      <p><strong>Cidade:</strong> ${escapeHtml(user.address.city)}</p>
-      <p><strong>Empresa:</strong> ${escapeHtml(user.company.name)}</p>
+
+    <div class="movie-info">
+
+      <span class="movie-year">
+        ${ano}
+      </span>
+
+      <h3>
+        ${titulo}
+      </h3>
+
+      <p>
+        ${generos}
+      </p>
+
+      <button
+        class="details-button"
+        data-id="${filme.mal_id}"
+      >
+        Ver detalhes
+      </button>
+
     </div>
 
-    <button class="posts-button" type="button">
-      Ver posts ↓
-    </button>
-
-    <div class="posts" hidden></div>
   `;
 
-  const button = card.querySelector(".posts-button");
-  const postsContainer = card.querySelector(".posts");
 
-  button.addEventListener("click", async () => {
-    const isOpen = !postsContainer.hidden;
+  const button =
+    article.querySelector(".details-button");
 
-    if (isOpen) {
-      postsContainer.hidden = true;
-      button.textContent = "Ver posts ↓";
-      return;
-    }
 
-    postsContainer.hidden = false;
-    button.textContent = "Ocultar posts ↑";
-    postsContainer.innerHTML =
-      '<p class="loading">Carregando posts...</p>';
+  button.addEventListener(
+    "click",
+    () => abrirDetalhes(filme.mal_id)
+  );
 
-    try {
-      const posts = await getPostsByUser(user.id);
 
-      renderPosts(postsContainer, posts);
-    } catch (error) {
-      console.error(error);
-
-      postsContainer.innerHTML =
-        '<p class="error-message">Não foi possível carregar os posts.</p>';
-    }
-  });
-
-  return card;
+  return article;
 }
 
-function renderPosts(container, posts) {
-  if (!posts.length) {
-    container.innerHTML = "<p>Nenhum post encontrado.</p>";
+
+/**
+ * Mostra os filmes na página
+ */
+function mostrarFilmes(filmes) {
+
+  moviesContainer.innerHTML = "";
+
+  empty.classList.add("hidden");
+
+
+  if (!filmes.length) {
+
+    empty.classList.remove("hidden");
+
     return;
   }
 
-  container.innerHTML = `
-    <div class="posts-header">
-      <h4>Posts deste usuário</h4>
-      <span>${posts.length} posts</span>
+
+  filmes.forEach(filme => {
+
+    const card =
+      criarCard(filme);
+
+    moviesContainer.appendChild(card);
+
+  });
+}
+
+
+/**
+ * Carrega os filmes
+ */
+async function carregarFilmes(pesquisa = "") {
+
+  mostrarLoading();
+
+  try {
+
+    const filmes =
+      await buscarFilmes(pesquisa);
+
+    esconderLoading();
+
+    mostrarFilmes(filmes);
+
+  } catch (erro) {
+
+    console.error(erro);
+
+    mostrarErro();
+
+  }
+
+}
+
+
+/**
+ * Abre detalhes do filme
+ */
+async function abrirDetalhes(id) {
+
+  movieModal.classList.remove("hidden");
+
+  movieDetails.innerHTML = `
+
+    <div class="modal-loading">
+
+      <div class="spinner"></div>
+
+      <p>
+        Carregando informações...
+      </p>
+
     </div>
+
   `;
 
-  posts.forEach((post) => {
-    const article = document.createElement("article");
 
-    article.className = "post";
+  try {
 
-    article.innerHTML = `
-      <h5>${escapeHtml(post.title)}</h5>
-      <p>${escapeHtml(post.body)}</p>
+    const filme =
+      await buscarDetalhesFilme(id);
+
+
+    const imagem =
+      filme.images?.jpg?.large_image_url ||
+      filme.images?.jpg?.image_url ||
+      "https://via.placeholder.com/500x700";
+
+
+    const nota =
+      filme.score
+        ? filme.score.toFixed(1)
+        : "N/A";
+
+
+    const ano =
+      formatarAno(filme.aired?.from);
+
+
+    const generos =
+      filme.genres
+        ?.map(genero => genero.name)
+        .join(", ") ||
+      "Não informado";
+
+
+    const estudios =
+      filme.studios
+        ?.map(estudio => estudio.name)
+        .join(", ") ||
+      "Não informado";
+
+
+    const sinopse =
+      filme.synopsis ||
+      "Sinopse não disponível.";
+
+
+    movieDetails.innerHTML = `
+
+      <div class="details">
+
+        <img
+          class="details-poster"
+          src="${imagem}"
+          alt="Poster de ${filme.title}"
+        >
+
+
+        <div class="details-info">
+
+          <span class="details-label">
+            FILME
+          </span>
+
+          <h2>
+            ${filme.title}
+          </h2>
+
+
+          <div class="details-rating">
+
+            <strong>
+              ⭐ ${nota}
+            </strong>
+
+            <span>
+              ${ano}
+            </span>
+
+          </div>
+
+
+          <p class="details-synopsis">
+            ${sinopse}
+          </p>
+
+
+          <div class="details-data">
+
+            <div>
+
+              <strong>
+                Gêneros
+              </strong>
+
+              <span>
+                ${generos}
+              </span>
+
+            </div>
+
+
+            <div>
+
+              <strong>
+                Duração
+              </strong>
+
+              <span>
+                ${filme.duration || "Não informado"}
+              </span>
+
+            </div>
+
+
+            <div>
+
+              <strong>
+                Estúdio
+              </strong>
+
+              <span>
+                ${estudios}
+              </span>
+
+            </div>
+
+
+            <div>
+
+              <strong>
+                Status
+              </strong>
+
+              <span>
+                ${filme.status || "Não informado"}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          ${
+            filme.url
+              ? `
+                <a
+                  href="${filme.url}"
+                  target="_blank"
+                  class="mal-button"
+                >
+                  Ver no MyAnimeList
+                </a>
+              `
+              : ""
+          }
+
+        </div>
+
+      </div>
+
     `;
 
-    container.appendChild(article);
-  });
-}
+  } catch (erro) {
 
-function renderUsers(list) {
-  usersContainer.innerHTML = "";
+    movieDetails.innerHTML = `
 
-  if (!list.length) {
-    usersContainer.innerHTML =
-      '<div class="empty">Nenhum usuário encontrado.</div>';
+      <div class="modal-error">
 
-    statusElement.textContent = "0 usuários encontrados";
-
-    return;
-  }
-
-  const fragment = document.createDocumentFragment();
-
-  list.forEach((user) => {
-    fragment.appendChild(createUserCard(user));
-  });
-
-  usersContainer.appendChild(fragment);
-
-  statusElement.textContent =
-    `${list.length} usuários encontrados`;
-}
-
-function filterUsers() {
-  const term = searchInput.value.trim().toLowerCase();
-
-  const filtered = users.filter((user) => {
-    return (
-      user.name.toLowerCase().includes(term) ||
-      user.email.toLowerCase().includes(term) ||
-      user.username.toLowerCase().includes(term)
-    );
-  });
-
-  renderUsers(filtered);
-}
-
-async function init() {
-  try {
-    statusElement.textContent = "Carregando usuários...";
-
-    users = await getUsers();
-
-    renderUsers(users);
-  } catch (error) {
-    console.error(error);
-
-    statusElement.textContent =
-      "Erro ao carregar os usuários.";
-
-    usersContainer.innerHTML = `
-      <div class="error-box">
-        <h3>Não foi possível carregar os usuários.</h3>
+        <h2>
+          Erro ao carregar filme
+        </h2>
 
         <p>
-          Verifique sua conexão com a internet e tente novamente.
+          Não foi possível carregar
+          os detalhes desse filme.
         </p>
 
-        <button id="retryButton">
-          Tentar novamente
-        </button>
       </div>
+
     `;
 
-    document
-      .querySelector("#retryButton")
-      .addEventListener("click", init);
   }
+
 }
 
-searchInput.addEventListener("input", filterUsers);
 
-init();
+/**
+ * Fecha o modal
+ */
+function fecharModal() {
+
+  movieModal.classList.add("hidden");
+
+}
+
+
+/**
+ * Eventos
+ */
+searchButton.addEventListener(
+  "click",
+  () => {
+
+    const pesquisa =
+      searchInput.value.trim();
+
+    carregarFilmes(pesquisa);
+
+  }
+);
+
+
+searchInput.addEventListener(
+  "keydown",
+  event => {
+
+    if (event.key === "Enter") {
+
+      const pesquisa =
+        searchInput.value.trim();
+
+      carregarFilmes(pesquisa);
+
+    }
+
+  }
+);
+
+
+closeModal.addEventListener(
+  "click",
+  fecharModal
+);
+
+
+modalOverlay.addEventListener(
+  "click",
+  fecharModal
+);
+
+
+tryAgain.addEventListener(
+  "click",
+  () => carregarFilmes()
+);
+
+
+/**
+ * Inicialização
+ */
+carregarFilmes();

@@ -1,105 +1,196 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+  <meta charset="UTF-8">
 
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-    <meta
-      name="description"
-      content="Cliente web desenvolvido com Vite e JavaScript Vanilla consumindo a API JSONPlaceholder."
-    />
+  <meta
+    name="description"
+    content="CineVerse - catálogo de filmes"
+  >
 
-    <title>Projeto 01 - Usuários e Posts</title>
-  </head>
+  <title>CineVerse - Filmes</title>
+</head>
 
-  <body>
+<body>
 
-    <header class="hero">
-      <div class="container">
+  <header class="header">
 
-        <p class="eyebrow">
-          Projeto 01 • API + JavaScript Vanilla
-        </p>
+    <div class="container header-content">
 
-        <h1>
-          Usuários e seus posts
-        </h1>
+      <a href="#" class="logo">
+        🎬 Cine<span>Verse</span>
+      </a>
 
-        <p class="subtitle">
-          Consulte usuários da JSONPlaceholder e veja
-          os posts relacionados a cada um.
-        </p>
+      <nav>
+        <a href="#inicio">Início</a>
+        <a href="#filmes">Filmes</a>
+      </nav>
+
+    </div>
+
+  </header>
+
+
+  <main>
+
+    <section class="hero" id="inicio">
+
+      <div class="container hero-content">
+
+        <div class="hero-text">
+
+          <span class="hero-label">
+            🎥 CATÁLOGO DE FILMES
+          </span>
+
+          <h1>
+            Encontre seu próximo
+            <span>filme favorito.</span>
+          </h1>
+
+          <p>
+            Pesquise filmes, veja avaliações,
+            informações e descubra novos títulos.
+          </p>
+
+          <a href="#filmes" class="hero-button">
+            Explorar filmes
+          </a>
+
+        </div>
 
       </div>
-    </header>
+
+    </section>
 
 
-    <main class="container">
+    <section class="movies-section" id="filmes">
 
-      <section class="toolbar">
+      <div class="container">
 
-        <div>
+        <div class="section-header">
 
-          <h2>
-            Usuários
-          </h2>
+          <div>
+            <span class="section-label">
+              CATÁLOGO
+            </span>
 
-          <p
-            id="status"
-            class="status"
-          >
-            Carregando...
-          </p>
+            <h2>
+              Filmes em destaque
+            </h2>
+          </div>
+
+          <div class="search-area">
+
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Pesquisar filme..."
+            >
+
+            <button id="searchButton">
+              🔎
+            </button>
+
+          </div>
 
         </div>
 
 
-        <label class="search">
-
-          <span>
-            Pesquisar
-          </span>
-
-          <input
-            id="searchInput"
-            type="search"
-            placeholder="Nome ou e-mail"
-          />
-
-        </label>
-
-      </section>
+        <div id="loading" class="loading">
+          <div class="spinner"></div>
+          <p>Carregando filmes...</p>
+        </div>
 
 
-      <section
-        id="users"
-        class="users-grid"
-      ></section>
+        <div
+          id="error"
+          class="error hidden"
+        >
+          <p>
+            Não foi possível carregar os filmes.
+          </p>
 
-    </main>
+          <button id="tryAgain">
+            Tentar novamente
+          </button>
+        </div>
 
 
-    <footer class="footer">
+        <div
+          id="moviesContainer"
+          class="movies-grid"
+        ></div>
 
-      <div class="container">
 
-        <p>
-          Dados fornecidos pela API JSONPlaceholder.
-        </p>
+        <div
+          id="empty"
+          class="empty hidden"
+        >
+          <div>🎬</div>
+
+          <h3>
+            Nenhum filme encontrado
+          </h3>
+
+          <p>
+            Tente pesquisar outro título.
+          </p>
+        </div>
 
       </div>
 
-    </footer>
+    </section>
+
+  </main>
 
 
-    <script
-      type="module"
-      src="/src/main.js"
-    ></script>
+  <div
+    id="movieModal"
+    class="modal hidden"
+  >
 
-  </body>
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+    <div class="modal-content">
+
+      <button
+        id="closeModal"
+        class="close-button"
+      >
+        ×
+      </button>
+
+      <div id="movieDetails"></div>
+
+    </div>
+
+  </div>
+
+
+  <footer>
+
+    <div class="container">
+
+      <p>
+        🎬 CineVerse
+      </p>
+
+      <span>
+        Projeto desenvolvido com Vite.js e JavaScript Vanilla.
+      </span>
+
+    </div>
+
+  </footer>
+
+
+  <script type="module" src="/src/main.js"></script>
+
+</body>
 </html>
