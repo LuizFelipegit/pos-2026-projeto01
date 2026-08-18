@@ -1,71 +1,193 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
+
+<head>
+    <meta charset="UTF-8">
 
     <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <meta
-      name="description"
-      content="Cliente web desenvolvido com Vite e JavaScript Vanilla consumindo a API JSONPlaceholder."
-    />
+        name="description"
+        content="CineVerse - Encontre seus filmes favoritos"
+    >
 
-    <title>Projeto 01 - Usuários e Posts</title>
-  </head>
+    <title>CineVerse - Filmes</title>
+    <link rel="stylesheet" href="/src/style.css">
+</head>
 
-  <body>
-    <header class="hero">
-      <div class="container">
-        <p class="eyebrow">
-          Projeto 01 • API + JavaScript Vanilla
-        </p>
+<body>
+    <header class="header">
+        <div class="container header-content">
+            <a
+                href="#inicio"
+                class="logo"
+            >
+                🎬 Cine<span>Verse</span>
+            </a>
 
-        <h1>
-          Usuários e seus posts
-        </h1>
+            <nav>
+                <a href="#inicio">
+                    Início
+                </a>
 
-        <p class="subtitle">
-          Consulte usuários da JSONPlaceholder e veja
-          os posts relacionados a cada um.
-        </p>
-      </div>
+                <a href="#filmes">
+                    Filmes
+                </a>
+            </nav>
+        </div>
     </header>
 
-    <main class="container">
-      <section class="toolbar">
-        <div>
-          <h2>Usuários</h2>
+    <main>
+        <section
+            id="inicio"
+            class="hero"
+        >
+            <div class="container">
+                <div class="hero-text">
+                    <span class="categoria">
+                        🎬 CINEVERSE
+                    </span>
 
-          <p id="status" class="status">
-            Carregando...
-          </p>
-        </div>
+                    <h1>
+                        Encontre seu
+                        próximo
+                        <span>filme favorito.</span>
+                    </h1>
 
-        <label class="search">
-          <span>Pesquisar</span>
+                    <p>
+                        Pesquise filmes, descubra lançamentos
+                        e veja informações completas sobre
+                        seus filmes favoritos.
+                    </p>
 
-          <input
-            id="searchInput"
-            type="search"
-            placeholder="Nome ou e-mail"
-          />
-        </label>
-      </section>
+                    <a
+                        href="#filmes"
+                        class="botao-hero"
+                    >
+                        Explorar filmes
+                    </a>
+                </div>
+            </div>
+        </section>
 
-      <section id="users" class="users-grid"></section>
+        <section
+            id="filmes"
+            class="catalogo"
+        >
+            <div class="container">
+                <div class="cabecalho">
+                    <div>
+                        <span class="categoria">
+                            CATÁLOGO
+                        </span>
+
+                        <h2>
+                            Filmes populares
+                        </h2>
+                    </div>
+
+                    <div class="pesquisa">
+                        <input
+                            type="text"
+                            id="pesquisa"
+                            placeholder="Pesquisar filme..."
+                        >
+
+                        <button
+                            id="botaoPesquisa"
+                            type="button"
+                        >
+                            🔎
+                        </button>
+                    </div>
+                </div>
+
+                <div
+                    id="loading"
+                    class="loading"
+                >
+                    <div class="spinner"></div>
+
+                    <p>
+                        Carregando filmes...
+                    </p>
+                </div>
+
+                <div
+                    id="erro"
+                    class="erro hidden"
+                >
+                    <h3>
+                        Ocorreu um erro
+                    </h3>
+
+                    <p id="mensagemErro">
+                        Não foi possível carregar os filmes.
+                    </p>
+                </div>
+
+                <div
+                    id="vazio"
+                    class="vazio hidden"
+                >
+                    <div>
+                        🎬
+                    </div>
+
+                    <h3>
+                        Nenhum filme encontrado
+                    </h3>
+
+                    <p>
+                        Tente pesquisar outro filme.
+                    </p>
+                </div>
+
+                <div
+                    id="listaFilmes"
+                    class="filmes"
+                ></div>
+            </div>
+        </section>
     </main>
 
-    <footer class="footer">
-      <div class="container">
-        <p>
-          Dados fornecidos pela API JSONPlaceholder.
-        </p>
-      </div>
+    <div
+        id="modal"
+        class="modal hidden"
+    >
+        <div class="modal-caixa">
+            <button
+                id="fecharModal"
+                class="fechar"
+                type="button"
+            >
+                ×
+            </button>
+
+            <div id="conteudoModal"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <strong>
+                🎬 CineVerse
+            </strong>
+
+            <p>
+                Projeto desenvolvido com JavaScript
+                Vanilla e API TMDB.
+            </p>
+        </div>
     </footer>
 
-    <script type="module" src="/src/main.js"></script>
-  </body>
+    <script
+        type="module"
+        src="/src/main.js"
+    ></script>
+</body>
+
 </html>
